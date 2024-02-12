@@ -27,9 +27,10 @@ for i in range(NUM_TRANSMISSIONS):
     encodedData = setup.encode()
     # TODO: Send RPC request (i.e., rpc_data) to the server
     sock_object.sendto(encodedData, (server_address,server_port))
+    print("sent:",encodedData.decode())
     # TODO: Receive result back from the server into the variable result_data
     response = sock_object.recv(100)
     # TODO: Display it in the format "prime: yes" or "prime: no"
-    print(response)
+    print("prime:",response.decode())
 # TODO: Close any sockets that are open
 sock_object.close()
