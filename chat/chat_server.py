@@ -33,30 +33,27 @@ tcp_server.listen()
 # by including listener_socket in event handling 
 
 
-active = True
 sockets = [tcp_server]
-while active:
+while True:
     # Use select to see which socket is available to read from
     ready, _, _, = select.select(sockets,[],[])
     for sock in ready:
+        # data in tcp_server -> accepting multiple clients
         if sock == tcp_server:
             client_socket,client_address = tcp_server.accept()
             sockets.append(client_socket)
+        # data from other sockets -> filter and send to others
         else:
-            data = sock.recv(1024).decode()
+            data = sock.recv(100).decode()
             if data:
-                print("received:",data)
+                print("echo received:",data)
+                # replace bad words
                 data = replace_bad_words(data).encode()
-                # forward to other sockets
+                # forward to all other sockets, i included the echo to the sender as well
                 for othersock in sockets:
-                    if othersock != sock and othersock != tcp_server:
+                    if othersock != tcp_server:
                         othersock.send(data)
+            # if there's no data then we should close this socket
             else:
                 sock.close()
                 sockets.remove(sock)
-
-
-
-# Close sockets
-for sock in sockets:
-    sock.close()

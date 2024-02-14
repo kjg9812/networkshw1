@@ -34,7 +34,7 @@ while True:
         tcp_client.send(response.encode())
     # Receive data if socket fileno is in ready_fds
     if tcp_client.fileno() in ready_fds:
-        data = tcp_client.recv(1024).decode()
+        data = tcp_client.recv(100).decode()
         if not data:
             break
         else:
