@@ -22,11 +22,11 @@ if len(sys.argv) != 2:
 port = int(sys.argv[1])
 
 # Create a TCP socket to listen on port for new connections
-
+tcp_server = socket(AF_INET,SOCK_STREAM)
 # Bind the server's socket to port
-
+tcp_server.bind(('0.0.0.0',port))
 # Put listener_socket in LISTEN mode
-
+tcp_server.listen()
 # Accept a connection first from two clients
 # OR 
 # implement accepting connections from multiple clients
@@ -34,18 +34,29 @@ port = int(sys.argv[1])
 
 
 active = True
-
+sockets = [tcp_server]
 while active:
-    pass
     # Use select to see which socket is available to read from
+    ready, _, _, = select.select(sockets,[],[])
+    for sock in ready:
+        if sock == tcp_server:
+            client_socket,client_address = tcp_server.accept()
+            sockets.append(client_socket)
+        else:
+            data = sock.recv(1024).decode()
+            if data:
+                print("received:",data)
+                data = replace_bad_words(data).encode()
+                # forward to other sockets
+                for othersock in sockets:
+                    if othersock != sock and othersock != tcp_server:
+                        othersock.send(data)
+            else:
+                sock.close()
+                sockets.remove(sock)
 
-    # recv on socket that is ready to read
-
-    # Check to see if connection is closed
-
-    # Filter and replace bad words
-
-    # Forward to other sockets
 
 
 # Close sockets
+for sock in sockets:
+    sock.close()
